@@ -13,9 +13,9 @@ import Config from '/config';
  */
 const MENU_QUERY = graphql`
   query MenuQuery {
-    wpMenu(slug: { eq: "header-menu" })
+    wpMenu(name: { eq: "Header Menu" })
   }
-`;
+`; //, slug: { eq: "header-menu" }
 
 const Logo = () => (
   <img src="/images/company_juice_logo_v003_210x50_white.svg" height="50" width="210" alt="Our Logo" />
@@ -52,9 +52,6 @@ class Menu extends Component {
     const result = await client.query({
       query: MENU_QUERY,
     });
-    console.log("----");
-    console.log(result);
-    console.log("----");
     const menus = result.data.headerMenu;
     this.setState({ menus });
   };
@@ -64,6 +61,10 @@ class Menu extends Component {
 
     //const authToken = localStorage.getItem(AUTH_TOKEN);
     const { menus } = this.state;
+    console.log("----");
+    console.log(menus);
+    console.log("----");
+
     const { history } = this.props;
 
     const handleSelectChange = (e) => {
@@ -75,10 +76,10 @@ class Menu extends Component {
         <div className="flex justify-between w-90-l center-l">
           <div className="brand bb flex justify-center items-center w-100 justify-between-l bn-l">
             <Link to="/?ref=header" className="starter-kit-logo">
-                <Logo />
-                <div className="pl2" style={{display: 'none'}}>
-                  Give Your Company A Boost!
-                </div>
+              <Logo />
+              <div className="pl2" style={{display: 'none'}}>
+                Give Your Company A Boost!
+              </div>
             </Link>
           </div>
           <div className="links dn flex-l justify-between items-center">
