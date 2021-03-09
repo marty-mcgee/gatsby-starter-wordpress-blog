@@ -38,7 +38,7 @@ const Layout = ({ isHomePage, children }) => {
       <footer>
         <div className="labs-footer bg-black">
           <a href="/?ref=footer">
-            <img src="/static/images/company_juice_logo_v003_210x50_white.svg" height="50" width="50" />
+            <img src="https://companyjuice.com/static/images/company_juice_logo_v003_210x50_white.svg" height="50" />
           </a>
           <p className="white">Give Your Company A Boost!</p>
           <p className="white">We are React + WordPress experts.</p>
