@@ -1,62 +1,71 @@
-import React from "react"
-import { Link, useStaticQuery, graphql } from "gatsby"
-import parse from "html-react-parser"
+import React, { useState } from 'react'
+import Header from '../components/Header'
+import Footer from '../components/Footer'
 
-const Layout = ({ isHomePage, children }) => {
-  const {
-    wp: {
-      generalSettings: { title },
-    },
-  } = useStaticQuery(graphql`
-    query LayoutQuery {
-      wp {
-        generalSettings {
-          title
-          description
-        }
-      }
-    }
-  `)
+import { GoogleReCaptchaProvider, GoogleReCaptcha } from 'react-google-recaptcha-v3'
+// IMPORTANT NOTES: The `GoogleReCaptcha` component is a wrapper around `useGoogleRecaptcha` hook and use `useEffect` to run the verification.
+// It's important that you understand how React hooks work to use it properly.
+// Avoid using inline function for the `onVerify` props as it can possibly cause the verify function to run continously.
+// To avoid that problem, you can use a memoized function provided by `React.useCallback` or a class method
+// The code below is an example that inline function can result in an infinite loop and the verify function runs continously:
+
+const MyComponent = () => {
+  const [token, setToken] = useState()
 
   return (
-    <div className="global-wrapper" data-is-root-path={isHomePage}>
-      <header className="global-header">
-        {isHomePage ? (
-          <h1 className="main-heading">
-            <Link to="/?ref=header">{parse(title)}</Link>
-          </h1>
-        ) : (
-          <Link className="header-link-home" to="/?ref=header">
-            {title}
-          </Link>
-        )}
-      </header>
-      
-      {/* the main, baby */}
-      <main>{children}</main>
-
-      <footer>
-        <div className="labs-footer bg-black">
-          <a href="/?ref=footer">
-            <img src="https://companyjuice.com/static/images/company_juice_logo_v003_210x50_white.svg" height="50" />
-          </a>
-          <p className="white">Give Your Company A Boost!</p>
-          <p className="white">We are React + WordPress experts.</p>
-          <p className="white">
-            <a href="https://github.com/companyjuice">GitHub</a>
-            &nbsp;-||-&nbsp;
-            <a href="https://www.linkedin.com/in/martymcgee">LinkedIn</a>
-          </p>
-          <p className="white">
-            © {new Date().getFullYear()} Company Juice, built with
-            {` `}
-            <a href="https://www.gatsbyjs.com/">Gatsby</a> +
-            {` `}
-            <a href="https://wordpress.org/">WordPress</a>
-          </p>
-        </div>
-      </footer>
+    <div>
+      <GoogleReCaptcha
+        onVerify={recaptcha_token => {
+          setToken(recaptcha_token)
+        }}
+      />
     </div>
+  )
+}
+
+
+const Layout = props => {
+  const { children } = props;
+  /** reCAPTCHA */
+  const handleVerify = e => {
+    console.log(e)
+    // e.persist()
+    // this.setState({
+    //   [e.target.id]: e.target.value
+    // })
+    // this.setState({
+    //   status_submitted: false,
+    //   status_submitting: false,
+    //   status_info_error: false, 
+    //   status_info_msg: null,
+    // })
+    // this.setState({
+    //   recaptcha_token: e,
+    // })
+  }
+  return (
+    <GoogleReCaptchaProvider
+      reCaptchaKey="6LeleS0aAAAAAPY9sbnaVxLOrhn4sH-7cxZXnJLW"
+      //reCaptchaKey="6LcYuTgaAAAAAG3nXK1gSyTc3ACUzlWNtNtTuM6t" // "[Your recaptcha key]"
+      // language="[optional_language]"
+      // useRecaptchaNet="[optional_boolean_value]"
+      // scriptProps={{
+      //   async: false, // optional, default to false
+      //   defer: false, // optional, default to false
+      //   appendTo: "head", // optional, default to "head", can be "head" or "body"
+      //   nonce: undefined, // optional, default undefined
+      // }}
+    >
+      <div>
+        <Header />
+        <main>
+          {children}
+        </main>
+        <Footer />
+      </div>
+      <GoogleReCaptcha onVerify={handleVerify} />
+      {/*<MyComponent />*/}
+    </GoogleReCaptchaProvider>
   )
 }
 

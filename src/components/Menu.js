@@ -1,10 +1,29 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Component } from 'react';
-import Link from 'next/link';
-import Router from 'next/router';
-import Config from '../config';
-import Logo from '../static/images/company_juice_logo_v003_210x50_white.svg';
-import SearchIcon from '../static/images/search.svg';
+//import Link from 'next/link';
+//import Router from 'next/router';
+import { Link, Router, graphql } from "gatsby"
+import Config from '/config';
+//import { ReactComponent as Logo } from '/static/images/company_juice_logo_v003_210x50_white.svg';
+//import SearchIcon from '/static/images/search.svg';
+
+/**
+ * GraphQL menu query
+ * Gets the labels, types (internal or external) and URLs
+ */
+const MENU_QUERY = graphql`
+  query MenuQuery {
+    wpMenu(slug: { eq: "header-menu" })
+  }
+`;
+
+const Logo = () => (
+  <img src="/images/company_juice_logo_v003_210x50_white.svg" height="50" width="210" alt="Our Logo" />
+)
+
+const SearchIcon = () => (
+  <img src="/images/search.svg" height="20" width="20" alt="Search Our Site" />
+)
 
 const getSlug = url => {
   const parts = url.split('/');
@@ -15,37 +34,55 @@ class Menu extends Component {
   state = {
     token: null,
     username: null,
+    menus: [],
   };
 
   componentDidMount() {
     const token = localStorage.getItem(Config.AUTH_TOKEN);
     const username = localStorage.getItem(Config.USERNAME);
     this.setState({ token, username });
+    this.executeMenu();
   }
 
+  /**
+   * Execute the menu query, parse the result and set the state
+   */
+  executeMenu = async () => {
+    const { client } = this.props;
+    const result = await client.query({
+      query: MENU_QUERY,
+    });
+    console.log("----");
+    console.log(result);
+    console.log("----");
+    const menus = result.data.headerMenu;
+    this.setState({ menus });
+  };
+
   render() {
-    const { menu } = this.props;
     const { token, username } = this.state;
 
+    //const authToken = localStorage.getItem(AUTH_TOKEN);
+    const { menus } = this.state;
+    const { history } = this.props;
+
     const handleSelectChange = (e) => {
-      location.href = e.target.value;
+      //location.href = e.target.value;
     }
 
     return (
       <div className="menu bb">
         <div className="flex justify-between w-90-l center-l">
           <div className="brand bb flex justify-center items-center w-100 justify-between-l bn-l">
-            <Link href="/?ref=header">
-              <a className="starter-kit-logo">
-                <Logo width={210} height={50}/>
+            <Link to="/?ref=header" className="starter-kit-logo">
+                <Logo />
                 <div className="pl2" style={{display: 'none'}}>
                   Give Your Company A Boost!
                 </div>
-              </a>
             </Link>
           </div>
           <div className="links dn flex-l justify-between items-center">
-            {menu.items.map(item => {
+            {menus.map(item => {
               if (item.object === 'custom') {
                 return (
                   <a href={item.url} key={item.ID}>{item.title}</a>
@@ -55,19 +92,17 @@ class Menu extends Component {
               const actualPage = item.object === 'category' ? 'category' : 'post';
               return (
                 <Link
-                  as={`/${item.object}/${slug}`}
+                  to={`/${item.object}/${slug}`}
                   href={`/${actualPage}?slug=${slug}&apiRoute=${item.object}`}
                   key={item.ID}
                 >
-                  <a>{item.title}</a>
+                  {item.title}
                 </Link>
               );
             })}
 
-            <Link href="/search">
-              <a>
-                <SearchIcon width={25} height={25} />
-              </a>
+            <Link to="/search">
+              <SearchIcon />
             </Link>
 
             {token ? (
@@ -81,8 +116,8 @@ class Menu extends Component {
                 Log Out {username}
               </a>
             ) : (
-              <Link href="/login">
-                <a className="round-btn ba bw1 pv2 ph3">Log In</a>
+              <Link to="/login" className="round-btn ba bw1 pv2 ph3">
+                Log In
               </Link>
             )}
           </div>
@@ -92,7 +127,7 @@ class Menu extends Component {
             onChange={handleSelectChange}
           >
             <option value={false}>Menu</option>
-            {menu.items.map(item => {
+            {menus.map(item => {
               if (item.object === 'custom') {
                 return (
                   <option
